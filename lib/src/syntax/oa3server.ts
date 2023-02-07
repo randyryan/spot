@@ -13,6 +13,8 @@ export function oa3server(config: Oa3serverConfig): any {
 }
 
 export interface Oa3serverConfig {
+  /** Server name. This is not going to present in the OAS and is only used for Server lookup. */
+  name?: string;
   /** Server Url */
   url: string;
 }

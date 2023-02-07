@@ -9,6 +9,7 @@ import {
   Header,
   HttpMethod,
   isSpecificResponse,
+  Oa3Server,
   Oa3ServerVariable,
   Request,
   Response
@@ -62,7 +63,7 @@ export function generateOpenAPI3(contract: Contract): OpenApiV3 {
     paths: endpointsToPathsObject(
       contract.endpoints,
       typeTable,
-      contract.config
+      contract
     ),
     components: contractToComponentsObject(contract, typeTable),
     security: contract.security && [
@@ -103,7 +104,7 @@ function contractToComponentsObject(
 function endpointsToPathsObject(
   endpoints: Endpoint[],
   typeTable: TypeTable,
-  config: Config
+  contract: Contract
 ): PathsObject {
   return endpoints.reduce<PathsObject>((acc, endpoint) => {
     const pathName = endpoint.path
@@ -118,10 +119,37 @@ function endpointsToPathsObject(
     acc[pathName][pathItemMethod] = endpointToOperationObject(
       endpoint,
       typeTable,
-      config
+      contract.config
     );
+
+    // Server
+    const serverName = endpoint.server;
+    const server: ServerObject | undefined = endpointToServerObject(endpoint, contract);
+    if (server) {
+      acc[pathName].servers = [ server ];
+    } else {
+      console.error(`===== Li Wan's enhanced @airtasker/spot ===== Cannot add a server to ${endpoint.path}, reason: None servers with the name ${serverName} were declared.`)
+    }
+
     return acc;
   }, {});
+}
+
+/**
+ * Note that in OAS, Path Items have Servers (plural). But our goal is to only expand the @airtasker/spot's @endpoint.
+ */
+function endpointToServerObject(endpoint: Endpoint, contract: Contract): ServerObject | undefined {
+  const serverName: string = endpoint.server ?? '';
+  const server: Oa3Server = contract.oa3servers?.find(server => server.name === serverName)!;
+
+  if (server) {
+    return {
+      url: server.url,
+      description: server.description
+    };
+  }
+
+  return undefined;
 }
 
 function endpointToOperationObject(

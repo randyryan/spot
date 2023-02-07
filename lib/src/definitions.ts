@@ -32,6 +32,10 @@ export interface Endpoint {
   tags: string[];
   method: HttpMethod;
   path: string;
+  /**
+   * Allow to carry the server name parsed from @endpoint. This is not going to present in the OAS and is only used for Server lookup.
+   */
+  server?: string;
   request?: Request;
   responses: Response[];
   defaultResponse?: DefaultResponse;
@@ -87,6 +91,10 @@ export interface Body {
 }
 
 export interface Oa3Server {
+  /**
+   * Allow to carry the server name parsed from @oa3server. This is not going to present in the OAS and is only used for Server lookup.
+   */
+  name?: string;
   url: string;
   description?: string;
   oa3ServerVariables: Oa3ServerVariable[];

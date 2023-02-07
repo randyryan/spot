@@ -93,6 +93,12 @@ export function parseEndpoint(
   if (pathResult.isErr()) return pathResult;
   const path = pathResult.unwrap();
 
+  // Handle server
+  const serverResult = extractEndpointServer(decoratorConfig);
+  if (serverResult.isErr()) return serverResult;
+  const server = serverResult.unwrap();
+  console.warn(`===== Li Wan's enhanced @airtakser/spot ===== @endpoint for ${klass.getName()} at path: ${path} had described a server: ${server}`);
+
   // Check request path params cover the path dynamic components
   const pathParamsInPath = getDynamicPathComponents(path);
   const pathParamsInRequest =
@@ -136,6 +142,21 @@ export function parseEndpoint(
   lociTable.addMorphNode(LociTable.endpointDecoratorKey(name), decorator);
   lociTable.addMorphNode(LociTable.endpointMethodKey(name), methodProp);
 
+  if (server === "") {
+    return ok({
+      name,
+      description,
+      summary,
+      tags,
+      method,
+      path,
+      request,
+      responses,
+      defaultResponse,
+      draft
+    });
+  }
+
   return ok({
     name,
     description,
@@ -143,6 +164,7 @@ export function parseEndpoint(
     tags,
     method,
     path,
+    server,
     request,
     responses,
     defaultResponse,
@@ -241,6 +263,19 @@ function extractEndpointPath(
   }
 
   return ok(path);
+}
+
+/**
+ * Li Wan's enhanced @airtasker/spot
+ */
+function extractEndpointServer(decoratorConfig: ObjectLiteralExpression): Result<string, ParserError> {
+  const serverProp = getObjLiteralProp<EndpointConfig>(decoratorConfig, "server");
+  if (serverProp === undefined) return ok("");
+
+  const serverLiteral = getPropValueAsStringOrThrow(serverProp);
+  const server = serverLiteral.getLiteralText();
+
+  return ok(server);
 }
 
 function extractEndpointResponses(

@@ -7,6 +7,7 @@ import { Oa3Server, Oa3ServerVariable } from "../definitions";
 import {
   getDecoratorConfigOrThrow,
   getJsDoc,
+  getObjLiteralProp,
   getObjLiteralPropOrThrow,
   getParameterPropertySignaturesOrThrow,
   getParamWithDecorator,
@@ -50,6 +51,16 @@ function parseOa3Server(
     "url"
   );
   const urlLiteral = getPropValueAsStringOrThrow(urlProp);
+  // Parse the server name
+  const nameProp = getObjLiteralProp<Oa3serverConfig>(decoratorConfig, 'name');
+  let name;
+  if (nameProp === undefined) {
+    name = undefined;
+  } else {
+    name = getPropValueAsStringOrThrow(nameProp).getLiteralValue();
+
+    console.info(`===== Li Wan's enhanced @airtasker/spot ===== Server "${name}" at ${urlLiteral.getLiteralValue()} can be used for @endpoint declarations.`)
+  }
 
   const jsDocNode = getJsDoc(serverMethod);
   const description = jsDocNode?.getDescription().trim();
@@ -70,6 +81,7 @@ function parseOa3Server(
   }
 
   return ok({
+    name: name,
     url: urlLiteral.getLiteralValue(),
     description: description,
     oa3ServerVariables: serverVariables
