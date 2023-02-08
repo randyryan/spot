@@ -59,7 +59,7 @@ function parseOa3Server(
   } else {
     name = getPropValueAsStringOrThrow(nameProp).getLiteralValue();
 
-    console.info(`===== Li Wan's enhanced @airtasker/spot ===== Server "${name}" at ${urlLiteral.getLiteralValue()} can be used for @endpoint declarations.`)
+    console.info(`@airtasker/spot [lwan-mod] >>> Server "${name}" at "${urlLiteral.getLiteralValue()}" can be used for @endpoints.`)
   }
 
   const jsDocNode = getJsDoc(serverMethod);

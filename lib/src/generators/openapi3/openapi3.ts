@@ -127,8 +127,8 @@ function endpointsToPathsObject(
     const server: ServerObject | undefined = endpointToServerObject(endpoint, contract);
     if (server) {
       acc[pathName].servers = [ server ];
-    } else {
-      console.error(`===== Li Wan's enhanced @airtasker/spot ===== Cannot add a server to ${endpoint.path}, reason: None servers with the name ${serverName} were declared.`)
+    } else if (serverName) {
+      console.error(`@airtasker/spot [lwan-mod] >>> Cannot add server to endpoint at "${endpoint.path}": No servers named "${serverName}" were declared.`)
     }
 
     return acc;

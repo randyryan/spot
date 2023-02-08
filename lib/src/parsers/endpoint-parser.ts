@@ -97,7 +97,6 @@ export function parseEndpoint(
   const serverResult = extractEndpointServer(decoratorConfig);
   if (serverResult.isErr()) return serverResult;
   const server = serverResult.unwrap();
-  console.warn(`===== Li Wan's enhanced @airtakser/spot ===== @endpoint for ${klass.getName()} at path: ${path} had described a server: ${server}`);
 
   // Check request path params cover the path dynamic components
   const pathParamsInPath = getDynamicPathComponents(path);
@@ -156,6 +155,8 @@ export function parseEndpoint(
       draft
     });
   }
+
+  console.info(`@airtakser/spot [lwan-mod] >>> @endpoint "${klass.getName()}" at "${path}" specified server: "${server}"`);
 
   return ok({
     name,
