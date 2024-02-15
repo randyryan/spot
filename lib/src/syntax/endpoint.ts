@@ -25,8 +25,21 @@ export interface EndpointConfig {
   method: HttpMethod;
   /** URL path */
   path: string;
-  /** Server name, must points to one of a Server defined using @oa3server. This is not going to present in the OAS and is only used for Server lookup. */
+  /**
+   * LWAN-Mod
+   *
+   * Server name, must points to one of the Server object defined using the @oa3server decorator.
+   * Used for specifying the Oa3Server in the Endpoint (a Spot internal model) in the src/definition.ts and ServerObject
+   * lookup during document generation, not an information that's going to present in the generated document.
+   */
   server?: string;
   /** Endpoint grouping tags */
   tags?: string[];
+  /**
+   * LWAN-Mod
+   *
+   * Specification Extension, because the practice of how the Spot syntax are mapped to the OAS that its author decided,
+   * it's hard to come up with a universal and reusable practice for mapping extensions.
+   */
+  [ key: string ]: any;
 }

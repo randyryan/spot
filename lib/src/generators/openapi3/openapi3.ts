@@ -122,13 +122,15 @@ function endpointsToPathsObject(
       contract.config
     );
 
+    // LWAN-Mod
+    //
     // Server
     const serverName = endpoint.server;
     const server: ServerObject | undefined = endpointToServerObject(endpoint, contract);
     if (server) {
       acc[pathName].servers = [ server ];
     } else if (serverName) {
-      console.error(`@airtasker/spot [lwan-mod] >>> Cannot add server to endpoint at "${endpoint.path}": No servers named "${serverName}" were declared.`)
+      console.error(`@airtasker/spot [lwan-mod] >>> Failed to attach server to @endpoint "${endpoint.name}": No @oa3server with name "${serverName}" were declared.`)
     }
 
     return acc;
@@ -160,7 +162,7 @@ function endpointToOperationObject(
   const endpointRequest = endpoint.request;
   const endpointRequestBody = endpointRequest?.body;
 
-  return {
+  const operation: OperationObject = {
     tags: endpoint.tags.length > 0 ? endpoint.tags : undefined,
     description: endpoint.description,
     summary: endpoint.summary,
@@ -179,6 +181,16 @@ function endpointToOperationObject(
       typeTable
     )
   };
+
+  if (endpoint.extensions && endpoint.extensions.length) {
+    for (const extension of endpoint.extensions) {
+      operation[extension.name] = extension.value;
+
+      console.info(`@airtasker/spot [lwan-mod] >>> operation (${endpoint.method} ${endpoint.path}) extended: "${extension.name}: '${extension.value}'"`);
+    }
+  }
+
+  return operation;
 }
 
 function endpointRequestToParameterObjects(

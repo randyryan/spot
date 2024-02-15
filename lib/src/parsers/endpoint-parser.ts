@@ -1,5 +1,5 @@
-import { ClassDeclaration, ObjectLiteralExpression, Node } from "ts-morph";
-import { Endpoint, Response } from "../definitions";
+import { ClassDeclaration, ObjectLiteralExpression, Node, PropertyAssignment } from "ts-morph";
+import { Endpoint, Response, SpecExtension } from "../definitions";
 import { ParserError } from "../errors";
 import { LociTable } from "../locations";
 import { EndpointConfig } from "../syntax/endpoint";
@@ -13,7 +13,9 @@ import {
   getObjLiteralProp,
   getObjLiteralPropOrThrow,
   getPropValueAsArrayOrThrow,
+  getPropValueAsNumberOrThrow,
   getPropValueAsStringOrThrow,
+  getPropertyName,
   isHttpMethod
 } from "./parser-helpers";
 import { parseRequest } from "./request-parser";
@@ -89,10 +91,28 @@ export function parseEndpoint(
   if (pathResult.isErr()) return pathResult;
   const path = pathResult.unwrap();
 
+  // LWAN-Mod
+  //
   // Handle server
   const serverResult = extractEndpointServer(decoratorConfig);
   if (serverResult.isErr()) return serverResult;
   const server = serverResult.unwrap();
+
+  // LWAN-Mod
+  //
+  // Handle Specification Extentions
+  const extensionsResult = extractEndpointExtensions(decoratorConfig);
+  if (extensionsResult.isErr()) return extensionsResult;
+  const extensions = extensionsResult.unwrap();
+
+  decoratorConfig.getProperties()
+    .filter(p => Node.isPropertyAssignment(p))
+    .map(p => p as PropertyAssignment)
+    .map(p => getPropertyName(p))
+    .filter(pn => pn.startsWith('x-'))
+    .forEach(pn => {
+        console.info(`@airtakser/spot [lwan-mod] >>> @endpoint "${klass.getName()}" (${method} ${path}) specified extension: "${pn}"`);
+    });
 
   // Check request path params cover the path dynamic components
   const pathParamsInPath = getDynamicPathComponents(path);
@@ -152,7 +172,7 @@ export function parseEndpoint(
     });
   }
 
-  console.info(`@airtakser/spot [lwan-mod] >>> @endpoint "${klass.getName()}" at "${path}" specified server: "${server}"`);
+  console.info(`@airtakser/spot [lwan-mod] >>> @endpoint "${klass.getName()}" (${method} ${path}) specified @oa3server: "${server}"`);
 
   return ok({
     name,
@@ -165,7 +185,8 @@ export function parseEndpoint(
     request,
     responses,
     defaultResponse,
-    draft
+    draft,
+    extensions
   });
 }
 
@@ -263,7 +284,9 @@ function extractEndpointPath(
 }
 
 /**
- * Li Wan's enhanced @airtasker/spot
+ * LWAN-Mod
+ *
+ * Extract the server name from the endpoint decorator configuration.
  */
 function extractEndpointServer(decoratorConfig: ObjectLiteralExpression): Result<string, ParserError> {
   const serverProp = getObjLiteralProp<EndpointConfig>(decoratorConfig, "server");
@@ -273,6 +296,34 @@ function extractEndpointServer(decoratorConfig: ObjectLiteralExpression): Result
   const server = serverLiteral.getLiteralText();
 
   return ok(server);
+}
+
+/**
+ * LWAN-Mod
+ *
+ * Extract the extension properties values. Just a simple implementation supports only number and string value for the time being.
+ */
+function extractEndpointExtensions(decoratorConfig: ObjectLiteralExpression): Result<SpecExtension[], ParserError> {
+  const extensionProperties = decoratorConfig.getProperties()
+    .filter(p => Node.isPropertyAssignment(p) && getPropertyName((p as PropertyAssignment)).startsWith('x-'))
+    .map(p => p as PropertyAssignment);
+
+  const extensions: SpecExtension[] = [];
+  for (const propertyAssignment of extensionProperties) {
+    const name = getPropertyName(propertyAssignment);
+    const type = propertyAssignment.getType();
+    
+    if (type.isNumber()) {
+      const value = getPropValueAsNumberOrThrow(propertyAssignment).getLiteralValue();
+      extensions.push({ name, value });
+    }
+    if (type.isString()) {
+      const value = getPropValueAsStringOrThrow(propertyAssignment).getLiteralValue();
+      extensions.push({ name, value });
+    }
+  }
+
+  return ok(extensions);
 }
 
 function extractEndpointResponses(

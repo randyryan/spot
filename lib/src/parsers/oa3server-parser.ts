@@ -51,6 +51,9 @@ function parseOa3Server(
     "url"
   );
   const urlLiteral = getPropValueAsStringOrThrow(urlProp);
+
+  // LWAN-Mod
+  //
   // Parse the server name
   const nameProp = getObjLiteralProp<Oa3serverConfig>(decoratorConfig, 'name');
   let name;
@@ -59,7 +62,7 @@ function parseOa3Server(
   } else {
     name = getPropValueAsStringOrThrow(nameProp).getLiteralValue();
 
-    console.info(`@airtasker/spot [lwan-mod] >>> Server "${name}" at "${urlLiteral.getLiteralValue()}" can be used for @endpoints.`)
+    console.info(`@airtasker/spot [lwan-mod] >>> @oa3server "${name}" (${urlLiteral.getLiteralValue()}) is legitimate for @endpoint`)
   }
 
   const jsDocNode = getJsDoc(serverMethod);

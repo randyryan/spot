@@ -322,7 +322,7 @@ export function getPropValueAsObjectOrThrow(
  * @param property property signature
  */
 export function getPropertyName(
-  property: PropertyDeclaration | PropertySignature
+  property: PropertyDeclaration | PropertySignature | PropertyAssignment
 ): string {
   return property.getNameNode().getSymbolOrThrow().getEscapedName();
 }

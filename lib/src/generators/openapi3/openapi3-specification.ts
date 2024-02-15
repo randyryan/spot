@@ -83,6 +83,12 @@ export interface OperationObject {
   deprecated?: boolean;
   security?: SecurityRequirementObject[];
   servers?: ServerObject[];
+  /**
+   * LWAN-Mod
+   *
+   * https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.2.md#specification-extensions
+   */
+  [ key: string ]: any;
 }
 
 // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#referenceObject

@@ -25,6 +25,16 @@ export interface SecurityHeader {
   type: Type;
 }
 
+/**
+ * LWAN-Mod
+ *
+ * Record Specification Extensions when parsing AST.
+ */
+export interface SpecExtension {
+  name: string;
+  value: string | number;
+}
+
 export interface Endpoint {
   name: string;
   description?: string;
@@ -33,6 +43,8 @@ export interface Endpoint {
   method: HttpMethod;
   path: string;
   /**
+   * LWAN-Mod
+   *
    * Allow to carry the server name parsed from @endpoint. This is not going to present in the OAS and is only used for Server lookup.
    */
   server?: string;
@@ -40,6 +52,12 @@ export interface Endpoint {
   responses: Response[];
   defaultResponse?: DefaultResponse;
   draft: boolean;
+  /**
+   * LWAN-Mod
+   *
+   * Allow TS definition to carry OpenAPI Specification extensions.
+   */
+  extensions?: SpecExtension[];
 }
 
 export interface Request {
@@ -92,6 +110,8 @@ export interface Body {
 
 export interface Oa3Server {
   /**
+   * LWAN-Mod
+   *
    * Allow to carry the server name parsed from @oa3server. This is not going to present in the OAS and is only used for Server lookup.
    */
   name?: string;
